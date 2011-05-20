@@ -182,4 +182,39 @@ class Process_Helper{
             return array_unique($pids);
         }
     }
+    
+    /**
+     * get signal number of given signal name
+     * 
+     * uses signal constants when available (PCNTL extension must be installed)
+     * or calls the 'kill' program to figure out signal numbers
+     * 
+     * @param string|int $signal
+     * @return int
+     * @throws Process_Exception if the given signal can not be found
+     * @uses Process_Helper::exec()
+     * @link http://www.php.net/manual/en/pcntl.constants.php
+     */
+    public static function getSignal($signal){
+        if(is_int($signal)){
+            return $signal;
+        }
+        if(substr($signal,0,3) === 'SIG'){
+            if(defined($signal)){
+                return constant($signal);
+            }
+        }else{
+            if(defined('SIG'.$signal)){
+                return constant('SIG'.$signal);
+            }
+        }
+        if($signal === 'SIGKILL'){
+            return 9;
+        }
+        $ret = (int)trim(self::exec('kill -l '.escapeshellarg($signal)));
+        if($ret === 0){
+            throw new Process_Exception('Invalid signal name');
+        }
+        return $ret;
+    }
 }
