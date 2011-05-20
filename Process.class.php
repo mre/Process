@@ -61,8 +61,7 @@ class Process{
      * @uses Process::close()
      */
     public function __destruct(){
-        $this->kill();
-        $this->close();
+        $this->kill(true)->close();
     }
     
     /**
@@ -103,7 +102,7 @@ class Process{
     public function getExitcode(){
         $code = $this->exitcode;
         if($code === NULL){
-            $this->getStatus('exitcode');
+            $code = $this->getStatus('exitcode');
             if($code === NULL){
                 throw new Exception('Exit code not available');
             }
@@ -146,9 +145,14 @@ class Process{
     }
     
     /**
-     * close process handle
+     * close process handle and input/output pipes
      * 
+     * Warning: proc_close() waits for the process to terminate, so consider
+     * calling kill(true) before trying to close
+     * 
+     * @return Process $this (chainable)
      * @throws Process_Exception on error
+     * @see Process::kill()
      * @uses fclose() to close every input/ouput stream
      * @uses proc_close() to close process handle
      */
@@ -168,12 +172,22 @@ class Process{
     /**
      * kill process (with given signal)
      * 
-     * @param NULL|int $signal
+     * please be aware that this command does not necessarily terminate the process,
+     * as some signals can be blocked (most notably the default signal).
+     * 
+     * calling 'kill(true)' is an alias to SIGKILL. use it to make sure the process
+     * will actually be terminated
+     * 
+     * @param NULL|int|boolean $signal signal to send (true=SIGKILL,default:NULL=SIGTERM)
      * @return Process $this (chainable)
+     * @uses Process_Helper::getSignal() to resolve signal names to signal numbers
      * @uses proc_terminate()
      */
     public function kill($signal=NULL){
-        if($signal === NULL){
+        if($signal === true){
+            $signal = Process_Helper::getSignal('SIGKILL');
+        }
+        if($signal === NULL || $signal === false){
             proc_terminate($this->fp);
         }else{
             proc_terminate($this->fp,$signal);
