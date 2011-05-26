@@ -162,11 +162,12 @@ class Process{
                 throw new Process_Exception('Unable to close process pipe '.$n);
             }
         }
-        $ret = proc_close($this->fp);
-        if($ret === -1){
+        $code = proc_close($this->fp);
+        if($code === -1){
             throw new Process_Exception('Unable to close process handle'); 
         }
-        $this->exitcode = $ret;
+        $this->exitcode = $code;
+        return $this;
     }
     
     /**
