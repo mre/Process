@@ -55,7 +55,7 @@ class Process_Helper{
         
         while($check){
             $pid = array_shift($check);                                         // select next PID
-            if($ret = self::exec('ps --ppid '.$pid.' -o pid=',self::EXEC_LINES|self::EXEC_SUCCESS)){ // if this PID has children
+            if($ret = self::exec('ps --ppid '.$pid.' -o pid=',self::EXEC_LINES)){ // if this PID has children
                 foreach($ret as $pid){                                          // iterate through all children
                     $pid = (int)trim($pid);
                     if(!in_array($pid,$found,true)){
