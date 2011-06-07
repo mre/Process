@@ -61,7 +61,7 @@ class Process{
      * @uses Process::close()
      */
     public function __destruct(){
-        $this->kill(true)->close();
+        $this->kill(true)->close(true);
     }
     
     /**
@@ -150,18 +150,23 @@ class Process{
      * Warning: proc_close() waits for the process to terminate, so consider
      * calling kill(true) before trying to close
      * 
+     * @param boolean $force whether to ignore any issues and complete operation (should not be used unless your have a very good reason, e.g. destructing)
      * @return Process $this (chainable)
      * @throws Process_Exception on error
      * @see Process::kill()
      * @uses fclose() to close every input/ouput stream
      * @uses proc_close() to close process handle
      */
-    public function close(){
+    public function close($force=false){
+        //var_dump($this->pipes);
         foreach($this->pipes as $n=>$pipe){
-            if(fclose($pipe) === false){
+            if($force){
+                @fclose($pipe);
+            }else if(fclose($pipe) === false){
                 throw new Process_Exception('Unable to close process pipe '.$n);
             }
         }
+        $this->pipes = array();
         $code = proc_close($this->fp);
         if($code === -1){
             throw new Process_Exception('Unable to close process handle'); 
