@@ -168,10 +168,12 @@ class Process{
         }
         $this->pipes = array();
         $code = proc_close($this->fp);
-        if($code === -1){
-            throw new Process_Exception('Unable to close process handle'); 
+        if($code === false){                                                    // invalid result like when handle is invalid (already closed?)
+            throw new Process_Exception('Unable to close process handle');
         }
-        $this->exitcode = $code;
+        if($code !== -1){                                                       // ignore invalid exit code (likely process already dead)
+            $this->exitcode = $code;
+        }
         return $this;
     }
     
@@ -249,5 +251,21 @@ class Process{
      */
     public function getStreamWrite(){
         return $this->pipes[0];
+    }
+    
+    public function getStream(){
+        return Process_Stream::factory($this);
+    }
+    
+    public function setStreamBlocking($mode,$pipe=NULL){
+        if($pipe === NULL){
+            foreach($this->pipes as $pipe){
+                stream_set_blocking($pipe,$mode);
+            }
+            return true;
+        }else if(!isset($this->pipes[$pipe])){
+            throw new Process_Exception('Invalid pipe');
+        }
+        return stream_set_blocking($this->pipes[$pipe],$mode);
     }
 }
