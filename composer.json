@@ -1,0 +1,6 @@
+{
+    "name": "clue/Process",
+    "autoload": {
+        "classmap": [ "Process_Exception.class.php", "Process_Helper.inc.php", "Process.class.php" ]
+    }
+}
