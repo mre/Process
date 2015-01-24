@@ -1,6 +1,31 @@
 {
-    "name": "clue/Process",
+    "name": "mre/process",
+    "description": "A lightweight PHP wrapper for subprocesses",
+    "keywords": ["php", "process", "wrapper"],
+    "homepage": "https://github.com/mre/process",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Christian Lueck",
+            "email": "christian@lueck.tv",
+            "homepage": "http://www.lueck.tv"
+        },
+        {
+            "name": "Matthias Endler",
+            "email": "matthias-endler@gmx.net",
+            "homepage": "http://www.matthias-endler.de/"
+        }
+    ],
     "autoload": {
-        "classmap": [ "Process_Exception.class.php", "Process_Helper.class.php", "Process.class.php" ]
+        "psr-0": {
+            "mre": "src/"
+        }
+    },
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.4.*"
     }
 }
+
