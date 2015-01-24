@@ -1,7 +1,6 @@
 <?php
 
 namespace mre;
-use Exception;
 
 /**
  * Process class
@@ -42,7 +41,7 @@ class Process
      * @param string $cmd command to execute
      * @param NULL|string $dir directory to execute command in
      * @param NULL|array $env environment to use (NULL=use current)
-     * @throws Process_Exception if process could not be started
+     * @throws ProcessException if process could not be started
      * @uses proc_open()
      */
     public function __construct($cmd, $dir = NULL, $env = NULL)
@@ -56,7 +55,7 @@ class Process
         $this->fp = proc_open($cmd, $pipes, $this->pipes, $dir, $env);
         if ($this->fp === false)
         {
-            throw new Process_Exception('Unable to start process');
+            throw new ProcessException('Unable to start process');
         }
     }
 
@@ -76,7 +75,7 @@ class Process
      *
      * @param string|NULL $flag
      * @return mixed
-     * @throws Process_Exception on error
+     * @throws ProcessException on error
      * @uses proc_get_status()
      */
     public function getStatus($flag = NULL)
@@ -84,7 +83,7 @@ class Process
         $status = proc_get_status($this->fp);
         if ($status === false)
         {
-            throw new Process_Exception('Unable to get process status');
+            throw new ProcessException('Unable to get process status');
         }
         if ($status['exitcode'] == -1 && $this->exitcode !== NULL)
         {              // exit code unknown, eg not first call after being exited
@@ -98,7 +97,7 @@ class Process
         {
             if (!isset($status[$flag]))
             {
-                throw new Process_Exception('Invalid status flag given');
+                throw new ProcessException('Invalid status flag given');
             }
             return $status[$flag];
         }
@@ -107,7 +106,7 @@ class Process
 
     /**
      * get process exit code
-     * @throws Process_Exception
+     * @throws ProcessException
      * @throws \Exception
      * @uses Process::getStatus()
      * @return int exit code
@@ -120,7 +119,7 @@ class Process
             $code = $this->getStatus('exitcode');
             if ($code === NULL)
             {
-                throw new Exception('Exit code not available');
+                throw new ProcessException('Exit code not available');
             }
         }
         return $code;
@@ -171,7 +170,7 @@ class Process
      *
      * @param boolean $force whether to ignore any issues and complete operation (should not be used unless your have a very good reason, e.g. destructing)
      * @return Process $this (chainable)
-     * @throws Process_Exception on error
+     * @throws ProcessException on error
      * @see  Process::kill()
      * @uses fclose() to close every input/ouput stream
      * @uses proc_close() to close process handle
@@ -186,14 +185,14 @@ class Process
                 @fclose($pipe);
             } else if (fclose($pipe) === false)
             {
-                throw new Process_Exception('Unable to close process pipe ' . $n);
+                throw new ProcessException('Unable to close process pipe ' . $n);
             }
         }
         $this->pipes = array();
         $code = proc_close($this->fp);
         if ($code === false)
         {                                                    // invalid result like when handle is invalid (already closed?)
-            throw new Process_Exception('Unable to close process handle');
+            throw new ProcessException('Unable to close process handle');
         }
         if ($code !== -1)
         {                                                       // ignore invalid exit code (likely process already dead)
@@ -213,14 +212,14 @@ class Process
      *
      * @param NULL|int|boolean $signal signal to send (true=SIGKILL,default:NULL=SIGTERM)
      * @return Process $this (chainable)
-     * @uses Process_Helper::getSignal() to resolve signal names to signal numbers
+     * @uses ProcessHelper::getSignal() to resolve signal names to signal numbers
      * @uses proc_terminate()
      */
     public function kill($signal = NULL)
     {
         if ($signal === true)
         {
-            $signal = Process_Helper::getSignal('SIGKILL');
+            $signal = ProcessHelper::getSignal('SIGKILL');
         }
         if ($signal === NULL || $signal === false)
         {
@@ -237,7 +236,7 @@ class Process
      *
      * @param int $len
      * @return string
-     * @throws Process_Exception on error
+     * @throws ProcessException on error
      * @uses fread()
      */
     public function fread($len)
@@ -245,7 +244,7 @@ class Process
         $ret = fread($this->pipes[1], $len);
         if ($ret === false)
         {
-            throw new Process_Exception('Unable to read from process output stream');
+            throw new ProcessException('Unable to read from process output stream');
         }
         return $ret;
     }
@@ -255,7 +254,7 @@ class Process
      *
      * @param string $buffer
      * @return int number of bytes actually written
-     * @throws Process_Exception on error
+     * @throws ProcessException on error
      * @uses fwrite()
      */
     public function fwrite($buffer)
@@ -263,7 +262,7 @@ class Process
         $ret = fwrite($this->pipes[0], $buffer);
         if ($ret === false)
         {
-            throw new Process_Exception('Unable to send to process input stream');
+            throw new ProcessException('Unable to send to process input stream');
         }
         return $ret;
     }
@@ -299,7 +298,7 @@ class Process
             return true;
         } else if (!isset($this->pipes[$pipe]))
         {
-            throw new Process_Exception('Invalid pipe');
+            throw new ProcessException('Invalid pipe');
         }
         return stream_set_blocking($this->pipes[$pipe], $mode);
     }

@@ -13,6 +13,6 @@ use Exception;
  * @version v0.0.1
  * @link https://github.com/clue/Process
  */
-class Process_Exception extends Exception
+class ProcessException extends Exception
 {
 }

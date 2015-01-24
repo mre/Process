@@ -12,7 +12,7 @@ namespace mre;
  * @version v0.0.1
  * @link https://github.com/clue/Process
  */
-class Process_Helper
+class ProcessHelper
 {
     /**
      * ignore exit code (i.e. do not throw exception when code is not 0)
@@ -85,7 +85,7 @@ class Process_Helper
      * @param string $cmd
      * @param int $mode see EXEC_* constants
      * @return mixed
-     * @throws Process_Exception on error
+     * @throws ProcessException on error
      */
     public static function exec($cmd, $mode = self::EXEC_LAST)
     {
@@ -95,7 +95,7 @@ class Process_Helper
 
         if ($code !== 0 && !($mode & self::EXEC_CODE_IGNORE))
         {
-            throw new Process_Exception('Process returned with exit code ' . $code);
+            throw new ProcessException('Process returned with exit code ' . $code);
         }
 
         if ($mode & self::EXEC_LINES)
@@ -116,7 +116,7 @@ class Process_Helper
      * @param string $cmd
      * @param int $mode
      * @return mixed
-     * @throws Process_Exception on error
+     * @throws ProcessException on error
      * @uses posix_getuid()
      * @uses Process_Helper::exec()
      */
@@ -134,14 +134,14 @@ class Process_Helper
      *
      * @param int|Process|array $pid processes to renice
      * @param int $level
-     * @throws Process_Exception on error
+     * @throws ProcessException on error
      * @uses Process_Helper::getPids()
      * @uses Process_Helper::execRoot()
      */
     public static function renice($pid, $level)
     {
         //if(PHP_OS != 'Linux'){
-        //    throw new Process_Exception('Not yet implemented');
+        //    throw new ProcessException('Not yet implemented');
         //}
         if ($level > 0)
         {
@@ -155,7 +155,7 @@ class Process_Helper
      *
      * @param int|Process|array $pid processes to kill
      * @param NULL|int $signal signal to use
-     * @throws Process_Exception on error
+     * @throws ProcessException on error
      * @uses Process_Helper::getPids() to expand PIDs
      * @uses Process_Helper::execRoot()
      */
@@ -169,7 +169,7 @@ class Process_Helper
      *
      * @param int|Process|array $pid
      * @param NULL|int $signal
-     * @throws Process_Exception on error
+     * @throws ProcessException on error
      * @uses Process_Helper::getPids()
      * @uses Process_Helper::getChildPids()
      * @uses Process_Helper::kill()
@@ -217,7 +217,7 @@ class Process_Helper
      *
      * @param string|int $signal
      * @return int
-     * @throws Process_Exception if the given signal can not be found
+     * @throws ProcessException if the given signal can not be found
      * @uses Process_Helper::exec()
      * @link http://www.php.net/manual/en/pcntl.constants.php
      */
@@ -247,7 +247,7 @@ class Process_Helper
         $ret = (int)trim(self::exec('kill -l ' . escapeshellarg($signal)));
         if ($ret === 0)
         {
-            throw new Process_Exception('Invalid signal name');
+            throw new ProcessException('Invalid signal name');
         }
         return $ret;
     }
