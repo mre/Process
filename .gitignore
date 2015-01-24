@@ -1,3 +1,5 @@
 /.settings
 vendor
 composer.lock
+.idea
+bin
