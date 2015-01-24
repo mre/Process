@@ -1,6 +1,7 @@
 <?php
 
 namespace mre;
+use Exception;
 
 /**
  * Process class
@@ -106,10 +107,10 @@ class Process
 
     /**
      * get process exit code
-     *
-     * @return int exit code
-     * @throws Process_Exception if process is still running
+     * @throws Process_Exception
+     * @throws \Exception
      * @uses Process::getStatus()
+     * @return int exit code
      */
     public function getExitcode()
     {
@@ -285,11 +286,6 @@ class Process
     public function getStreamWrite()
     {
         return $this->pipes[0];
-    }
-
-    public function getStream()
-    {
-        return Process_Stream::factory($this);
     }
 
     public function setStreamBlocking($mode, $pipe = NULL)
