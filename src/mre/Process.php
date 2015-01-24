@@ -239,7 +239,7 @@ class Process
      * @throws ProcessException on error
      * @uses fread()
      */
-    public function fread($len)
+    public function receive($len)
     {
         $ret = fread($this->pipes[1], $len);
         if ($ret === false)
@@ -257,7 +257,7 @@ class Process
      * @throws ProcessException on error
      * @uses fwrite()
      */
-    public function fwrite($buffer)
+    public function send($buffer)
     {
         $ret = fwrite($this->pipes[0], $buffer);
         if ($ret === false)
