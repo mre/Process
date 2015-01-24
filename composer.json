@@ -21,6 +21,9 @@
             "mre": "src/"
         }
     },
+    "config": {
+        "bin-dir": "bin"
+    },
     "require": {
         "php": ">=5.4.0"
     },
