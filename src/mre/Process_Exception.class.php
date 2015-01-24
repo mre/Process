@@ -1,5 +1,8 @@
 <?php
 
+namespace mre;
+use Exception;
+
 /**
  * lightweight process exception
  *

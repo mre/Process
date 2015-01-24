@@ -1,5 +1,7 @@
 <?php
 
+namespace mre;
+
 /**
  * static process helper functions
  *
