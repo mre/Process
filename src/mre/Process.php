@@ -1,6 +1,7 @@
 <?php
 
 namespace mre;
+use mre\Exception\ProcessException;
 
 /**
  * Process class
@@ -19,7 +20,7 @@ class Process
      *
      * @var resource
      */
-    protected $fp;
+    protected $process;
 
     /**
      * process input/output stream resources
@@ -52,8 +53,14 @@ class Process
             2 => STDERR
         );
 
-        $this->fp = proc_open($cmd, $pipes, $this->pipes, $dir, $env);
-        if ($this->fp === false)
+        $this->process = proc_open($cmd, $pipes, $this->pipes, $dir, $env);
+
+        if (is_resource($this->process))
+        {
+            $this->stdin = $this->pipes[0];
+            $this->stdout = $this->pipes[1];
+        }
+        else
         {
             throw new ProcessException('Unable to start process');
         }
@@ -80,7 +87,7 @@ class Process
      */
     public function getStatus($flag = NULL)
     {
-        $status = proc_get_status($this->fp);
+        $status = proc_get_status($this->process);
         if ($status === false)
         {
             throw new ProcessException('Unable to get process status');
@@ -189,7 +196,7 @@ class Process
             }
         }
         $this->pipes = array();
-        $code = proc_close($this->fp);
+        $code = proc_close($this->process);
         if ($code === false)
         {                                                    // invalid result like when handle is invalid (already closed?)
             throw new ProcessException('Unable to close process handle');
@@ -223,10 +230,10 @@ class Process
         }
         if ($signal === NULL || $signal === false)
         {
-            proc_terminate($this->fp);
+            proc_terminate($this->process);
         } else
         {
-            proc_terminate($this->fp, $signal);
+            proc_terminate($this->process, $signal);
         }
         return $this;
     }
@@ -234,19 +241,14 @@ class Process
     /**
      * read up to $len bytes from process output
      *
-     * @param int $len
-     * @return string
+     * @return string Output of the process
      * @throws ProcessException on error
-     * @uses fread()
      */
-    public function receive($len)
+    public function receive()
     {
-        $ret = fread($this->pipes[1], $len);
-        if ($ret === false)
-        {
-            throw new ProcessException('Unable to read from process output stream');
+        while (($line = fgets($this->stdout)) !== false) {
+            yield $line;
         }
-        return $ret;
     }
 
     /**
@@ -259,7 +261,7 @@ class Process
      */
     public function send($buffer)
     {
-        $ret = fwrite($this->pipes[0], $buffer);
+        $ret = fwrite($this->stdin, $buffer . PHP_EOL);
         if ($ret === false)
         {
             throw new ProcessException('Unable to send to process input stream');
@@ -274,7 +276,7 @@ class Process
      */
     public function getStreamRead()
     {
-        return $this->pipes[1];
+        return $this->stdout;
     }
 
     /**
@@ -284,7 +286,7 @@ class Process
      */
     public function getStreamWrite()
     {
-        return $this->pipes[0];
+        return $this->stdin;
     }
 
     public function setStreamBlocking($mode, $pipe = NULL)
